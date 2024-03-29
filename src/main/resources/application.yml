@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    generate-ddl: true
+    defer-datasource-initialization: true
+    open-in-view: false
+server:
+  port: 8081
+app:
+  options:
+    probe-interval_seconds: ${PROBE_INTERVAL_SECONDS}
+  stream-connection:
+    http-url: ${STREAMING_SERVER_HTTP_URL}
+    rtmp-url: ${STREAMING_SERVER_RTMP_URL}
+    http-url-client: ${STREAMING_SERVER_HTTP_URL_CLIENT}
+    rtmp-url-client: ${STREAMING_SERVER_RTMP_URL_CLIENT}
+    rtmp-token: ${STREAMING_SERVER_RTMP_TOKEN}
+    username: ${STREAMING_SERVER_USERNAME}
+    password: ${STREAMING_SERVER_PASSWORD}
+  stream-options:
+    thread-queue-size: ${THREAD_QUEUE_SIZE}
+    analyze-duration: ${ANALYZE_DURATION}
+    hls-time: ${HLS_TIME}
+    hls-list-size: ${HLS_LIST_SIZE}
+    hls-delete-threshold: ${HLS_DELETE_THRESHOLD}
+    master-pl-publish-rate: ${MASTER_PL_PUBLISH_RATE}
+    max-file-age-seconds: ${MAX_FILE_AGE_SECONDS}
+    reconnect-delay-seconds: ${RECONNECT_DELAY_SECONDS}
+    stale-timeout-seconds: ${STALE_TIMEOUT_SECONDS}
