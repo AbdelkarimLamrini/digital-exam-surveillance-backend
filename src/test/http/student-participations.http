@@ -1,0 +1,29 @@
+### CREATE NEW PARTICIPATION
+POST {{backend-server}}/api/student-participations
+Content-Type: application/json
+
+{
+	"examId": "DS2",
+	"classRoomId": "GR-101",
+	"studentId": "1234567-89",
+	"fullName": "John Doe",
+	"email": "john.doe@student.kdg.be"
+}
+
+### GET PARTICIPATION BY ID
+GET {{backend-server}}/api/student-participations/1
+
+### GET ALL ACTIVE PARTICIPATIONS
+GET {{backend-server}}/api/student-participations/active
+
+### TERMINATE PARTICIPATION
+DELETE {{backend-server}}/api/student-participations/1
+
+### GET ALL RECORDINGS FOR PARTICIPATION
+GET {{backend-server}}/api/student-participations/1/recordings
+
+### GET ALL LOGS FOR PARTICIPATION
+GET {{backend-server}}/api/student-participations/1/logs
+
+### GET ALL FRAUD DETECTIONS FOR PARTICIPATION
+GET {{backend-server}}/api/student-participations/1/fraud-detections

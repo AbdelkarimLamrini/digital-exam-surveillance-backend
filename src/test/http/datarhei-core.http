@@ -20,3 +20,186 @@ Authorization: Bearer {{refresh_token}}
 > {%
     client.global.set("access_token", response.body['access_token']);
 %}
+
+### TEST API
+GET {{streaming-server}}/api
+Authorization: Bearer {{access_token}}
+Accept: application/json
+
+### RESTART RESTREAMER
+GET {{streaming-server}}/api/v3/config/reload
+Authorization: Bearer {{access_token}}
+
+### GET RTMP STREAMS
+GET {{streaming-server}}/api/v3/rtmp
+Authorization: Bearer {{access_token}}
+Accept: application/json
+
+### GET PROCESSES
+GET {{streaming-server}}/api/v3/process
+Authorization: Bearer {{access_token}}
+Accept: application/json
+
+### CREATE STREAM PROCESS
+POST {{streaming-server}}/api/v3/process
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+	"type": "ffmpeg",
+	"id": "{{streamingProcessId}}",
+	"reference": "{{fileName}}",
+	"input": [
+		{
+			"id": "input_0",
+			"address": "{rtmp,name={{studentId}}.stream}",
+			"options": [
+				"-fflags",
+				"+genpts",
+				"-thread_queue_size",
+				"{{threadQueueSize}}",
+				"-analyzeduration",
+				"{{analyzeDuration}}"
+			]
+		}
+	],
+	"output": [
+		{
+			"id": "output_0",
+			"address": "{memfs}/{{fileName}}_{outputid}.m3u8",
+			"options": [
+				"-dn",
+				"-sn",
+				"-map",
+				"0:0",
+				"-codec:v",
+				"copy",
+				"-an",
+				"-f",
+				"hls",
+				"-start_number",
+				"0",
+				"-hls_time",
+				"{{hlsTime}}",
+				"-hls_list_size",
+				"{{hlsListSize}}",
+				"-hls_flags",
+				"append_list+delete_segments+program_date_time+temp_file",
+				"-hls_delete_threshold",
+				"{{hlsDeleteThreshold}}",
+				"-hls_segment_filename",
+				"{memfs}/{{fileName}}_{outputid}_%04d.ts",
+				"-master_pl_name",
+				"{{fileName}}.m3u8",
+				"-master_pl_publish_rate",
+				"{{masterPlPublishRate}}",
+				"-method",
+				"PUT"
+			],
+			"cleanup": [
+				{
+					"pattern": "memfs:/{{fileName}}**",
+					"max_files": 0,
+					"max_file_age_seconds": 0,
+					"purge_on_delete": true
+				},
+				{
+					"pattern": "memfs:/{{fileName}}_{outputid}.m3u8",
+					"max_files": 0,
+					"max_file_age_seconds": {{maxFileAgeSeconds}},
+				    "purge_on_delete": true
+				},
+				{
+					"pattern": "memfs:/{{fileName}}_{outputid}_**.ts",
+					"max_files": 12,
+					"max_file_age_seconds": {{maxFileAgeSeconds}},
+                    "purge_on_delete": true
+				},
+				{
+					"pattern": "memfs:/{{fileName}}.m3u8",
+					"max_files": 0,
+					"max_file_age_seconds": {{maxFileAgeSeconds}},
+				    "purge_on_delete": true
+				}
+			]
+		}
+	],
+	"options": [
+		"-err_detect",
+        "ignore_err",
+		"-y"
+	],
+	"reconnect": true,
+	"reconnect_delay_seconds": {{reconnectDelaySeconds}},
+    "autostart": true,
+    "stale_timeout_seconds": {{staleTimeOutSeconds}},
+    "limits": {
+        "cpu_usage": 0,
+        "memory_mbytes": 0,
+        "waitfor_seconds": 5
+    }
+}
+
+### CREATE RECORD PROCESS
+POST {{streaming-server}}/api/v3/process
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+	"type": "ffmpeg",
+	"id": "{{recordingProcessId}}",
+	"reference": "{{studentId}}",
+	"input": [
+		{
+			"id": "input_0",
+			"address": "{rtmp,name={{studentId}}.stream}",
+			"options": [
+				"-fflags",
+				"+genpts",
+				"-thread_queue_size",
+				"{{threadQueueSize}}",
+				"-analyzeduration",
+				"{{analyzeDuration}}"
+			]
+		}
+	],
+	"output": [
+		{
+			"id": "output_0",
+			"address": "{diskfs}/recordings/{{fileName}}.mp4",
+			"options": []
+		}
+	],
+	"options": [
+		"-err_detect",
+		"ignore_err",
+		"-y"
+	],
+	"autostart": true,
+	"reconnect": true,
+	"reconnect_delay_seconds": {{reconnectDelaySeconds}},
+	"stale_timeout_seconds": {{staleTimeOutSeconds}},
+	"limits": {
+		"cpu_usage": 0,
+		"memory_mbytes": 0,
+		"waitfor_seconds": 5
+	}
+}
+
+### GET STREAM PROCESS STATE
+GET {{streaming-server}}/api/v3/process/{{streamingProcessId}}/state
+Authorization: Bearer {{access_token}}
+Accept: application/json
+
+### GET RECORD PROCESS STATE
+GET {{streaming-server}}/api/v3/process/{{recordingProcessId}}/state
+Authorization: Bearer {{access_token}}
+Accept: application/json
+
+### DELETE STREAM PROCESS
+DELETE {{streaming-server}}/api/v3/process/{{streamingProcessId}}
+Authorization: Bearer {{access_token}}
+
+### DELETE RECORD PROCESS
+DELETE {{streaming-server}}/api/v3/process/{{recordingProcessId}}
+Authorization: Bearer {{access_token}}

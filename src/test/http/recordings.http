@@ -1,0 +1,8 @@
+### CREATE RECORDING OF STUDENT PARTICIPATION
+POST {{backend-server}}/api/recordings?participationId=1
+
+### STOP RECORDING OF STUDENT PARTICIPATION
+POST {{backend-server}}/api/recordings/stop?participationId=1
+
+### STOP RECORDING WITH ID 1
+POST {{backend-server}}/api/recordings/1/stop

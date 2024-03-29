@@ -1,0 +1,2 @@
+### STOP ALL PROCESSES
+DELETE {{backend-server}}/api/processes

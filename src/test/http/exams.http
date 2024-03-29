@@ -1,0 +1,35 @@
+### GET ALL EXAMS
+GET {{backend-server}}/api/exams
+
+### GET EXAM BY ID
+GET {{backend-server}}/api/exams/DS2
+
+### CREATE A NEW EXAM
+POST {{backend-server}}/api/exams
+Content-Type: application/json
+
+{
+	"id": "DS2",
+	"name": "Data Science 2 - 23/24",
+	"creatorName": "John Doe",
+	"startTime": "2024-03-30T12:30:00",
+	"endTime": "2024-03-30T14:30:00"
+}
+
+### END EXAM BY ID
+POST {{backend-server}}/api/exams/DS2/end
+
+### UPDATE EXAM BY ID
+PUT {{backend-server}}/api/exams/DS2
+Content-Type: application/json
+
+{
+	"id": "DS2",
+	"name": "Data Science 2 - 23/24",
+	"creatorName": "Jane Doe",
+	"startTime": "2024-03-31T13:30:00",
+	"endTime": "2024-03-31T15:30:00"
+}
+
+### DELETE EXAM BY ID
+DELETE {{backend-server}}/api/exams/DS2

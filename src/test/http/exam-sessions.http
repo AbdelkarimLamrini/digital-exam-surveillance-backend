@@ -1,0 +1,32 @@
+### GET ALL SESSIONS OF AN EXAM
+GET {{backend-server}}/api/exams/DS2/sessions
+
+### CREATE A SESSION
+POST {{backend-server}}/api/exams/DS2/session
+Content-Type: application/json
+
+{
+	"classRoomId": "GR-101",
+	"supervisorName": "John Doe"
+}
+
+### GET A DETAIL OF A SESSION
+GET {{backend-server}}/api/exam-sessions/1
+
+### END A SESSION
+POST {{backend-server}}/api/exam-sessions/1/end
+
+### GET ALL PARTICIPANTS OF A SESSION
+GET {{backend-server}}/api/exam-sessions/1/participations
+
+### UPDATE A SESSION
+PUT {{backend-server}}/api/exam-sessions/1
+Content-Type: application/json
+
+{
+	"classRoomId": "GR-102",
+	"supervisorName": "Jane Doe"
+}
+
+### DELETE A SESSION
+DELETE {{backend-server}}/api/exam-sessions/1
