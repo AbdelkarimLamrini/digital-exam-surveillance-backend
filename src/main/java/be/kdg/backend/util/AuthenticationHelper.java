@@ -14,8 +14,8 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Base64;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Component
@@ -72,7 +72,7 @@ public class AuthenticationHelper {
             }
 
             accessToken = responseBody.getAccessToken();
-            accessTokenExpirationTime = getExpirationTime(true);
+            accessTokenExpirationTime = getExpirationTime(accessToken);
         } catch (RestClientResponseException e) {
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 login();
@@ -101,8 +101,8 @@ public class AuthenticationHelper {
 
             accessToken = responseBody.getAccessToken();
             refreshToken = responseBody.getRefreshToken();
-            accessTokenExpirationTime = getExpirationTime(true);
-            refreshTokenExpirationTime = getExpirationTime(false);
+            accessTokenExpirationTime = getExpirationTime(accessToken);
+            refreshTokenExpirationTime = getExpirationTime(refreshToken);
         } catch (RestClientResponseException e) {
             log.error("Tried to login, but failed: %s".formatted(e.getMessage()));
             throw new AuthenticationException("Error logging in: %s".formatted(e.getMessage()));
@@ -118,21 +118,14 @@ public class AuthenticationHelper {
     private LocalDateTime getExpirationTime(String token) {
         var decoder = Base64.getUrlDecoder();
         var payload = new String(decoder.decode(token.split("\\.")[1]));
-        var expirationTimeLong = Long.parseLong(payload.split(",")[1].split(":")[1]);
-        var zoneOffset = ZoneId.of("Europe/Brussels").getRules().getOffset(LocalDateTime.now());
-        var expirationTimestamp = LocalDateTime.ofEpochSecond(expirationTimeLong, 0, zoneOffset);
-        log.info("Current Time: %s, Expiration Time: %s".formatted(LocalDateTime.now(), expirationTimestamp));
-        return expirationTimestamp;
-    }
-
-    /**
-     * Knowing each token is valid for 10 minutes, we set the expiration time to 9 minutes from now.
-     *
-     * @return the expiration time of the access token as a LocalDateTime
-     */
-    private LocalDateTime getExpirationTime(boolean isAccessToken) {
-        var expirationTimestamp = isAccessToken ? LocalDateTime.now().plusMinutes(9) : LocalDateTime.now().plusHours(23);
-        log.info("Current Time: %s, Expiration Time: %s".formatted(LocalDateTime.now(), expirationTimestamp));
-        return expirationTimestamp;
+        var pattern = Pattern.compile("\"exi\":\\s*(\\d+)");
+        var matcher = pattern.matcher(payload);
+        if (!matcher.find()) {
+            throw new AuthenticationException("Error parsing expiration time");
+        }
+        var durationSeconds = Long.parseLong(matcher.group(1));
+        // Set expiration time to 90% of the duration
+        durationSeconds = (long) (durationSeconds * 0.9);
+        return LocalDateTime.now().plusSeconds(durationSeconds);
     }
 }

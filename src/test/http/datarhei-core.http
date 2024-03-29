@@ -1,0 +1,22 @@
+### GET ACCESS TOKEN
+POST {{streaming-server}}/api/login
+Content-Type: application/json
+
+{
+	"username": "{{username}}",
+	"password": "{{password}}"
+}
+
+> {%
+    client.global.set("access_token", response.body['access_token']);
+    client.global.set("refresh_token", response.body['refresh_token']);
+%}
+
+### REFRESH ACCESS TOKEN
+GET {{streaming-server}}/api/login/refresh
+Accept: application/json
+Authorization: Bearer {{refresh_token}}
+
+> {%
+    client.global.set("access_token", response.body['access_token']);
+%}
