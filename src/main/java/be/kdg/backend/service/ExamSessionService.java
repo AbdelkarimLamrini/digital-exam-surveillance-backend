@@ -74,19 +74,14 @@ public class ExamSessionService {
     }
 
     @Transactional
-    public ExamSessionDto updateExamSession(String examId, Long id, NewExamSessionDto sessionDto) {
-        var tmpExam = examRepository.findById(examId);
-        if (tmpExam.isEmpty()) {
-            log.info("Tried to UPDATE ExamSession with non-existing Exam [%s]".formatted(examId));
-            throw new ResourceNotFoundException("Exam with id %s not found".formatted(examId));
-        }
-        var exam = tmpExam.get();
-        var tmpSession = examSessionRepository.findById(id);
+    public ExamSessionDto updateExamSession(Long id, NewExamSessionDto sessionDto) {
+        var tmpSession = examSessionRepository.findByIdWithExam(id);
         if (tmpSession.isEmpty()) {
             log.info("Tried to UPDATE non-existing ExamSession [%s]".formatted(id));
             throw new ResourceNotFoundException("ExamSession with id %s not found".formatted(id));
         }
         var examSession = tmpSession.get();
+        var examId = examSession.getExam().getId();
 
         if (!examSession.getClassRoomId().equals(sessionDto.getClassRoomId())) {
             var tmp = examSessionRepository.findByExamIdAndClassRoomId(examId, sessionDto.getClassRoomId());
@@ -98,9 +93,8 @@ public class ExamSessionService {
 
         examSession.setClassRoomId(sessionDto.getClassRoomId());
         examSession.setSupervisorName(sessionDto.getSupervisorName());
-        examSession.setExam(exam);
-
         examSession = examSessionRepository.save(examSession);
+
         return examSessionMapper.toDto(examSession);
     }
 

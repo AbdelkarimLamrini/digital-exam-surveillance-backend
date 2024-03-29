@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/process")
+@RequestMapping("/api/processes")
 public class ProcessController {
     private final StreamingService streamingService;
 

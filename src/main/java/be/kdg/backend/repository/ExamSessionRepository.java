@@ -27,4 +27,11 @@ public interface ExamSessionRepository extends JpaRepository<ExamSession, Long> 
             WHERE current_timestamp BETWEEN e.startTime AND e.endTime
             """)
     List<ExamSession> findActiveSessions();
+
+    @Query("""
+            SELECT s FROM ExamSession s
+            JOIN FETCH s.exam
+            WHERE s.id = :id
+            """)
+    Optional<ExamSession> findByIdWithExam(Long id);
 }

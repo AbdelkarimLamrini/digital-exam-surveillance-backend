@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/recording")
+@RequestMapping("/api/recordings")
 public class RecordingController {
     private final RecordingService recordingService;
 
