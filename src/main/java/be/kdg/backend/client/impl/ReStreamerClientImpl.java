@@ -21,8 +21,10 @@ import java.util.List;
 @Slf4j
 @Component
 public class ReStreamerClientImpl implements StreamingClient {
+    //region DI
     private final RestTemplate restTemplate;
     private final AuthenticationHelper authenticationHelper;
+    //endregion
     //region CONNECTION ENV VARS
     @Value("${app.stream-connection.http-url}")
     private String STREAMING_SERVER_HTTP_URL;
@@ -59,6 +61,8 @@ public class ReStreamerClientImpl implements StreamingClient {
         this.authenticationHelper = authenticationHelper;
     }
 
+    //region INTERFACE METHODS
+    @Override
     public List<String> getPublishingStudentIds() {
         var rtmpEntries = getActiveRtmpStreams();
         // We chose to use String.substring() instead of regex or String.split() because it will be faster.
@@ -180,7 +184,9 @@ public class ReStreamerClientImpl implements StreamingClient {
             }
         }
     }
+    //endregion
 
+    //region API CALLS
     private void createProcess(String payload) {
         var headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -224,7 +230,9 @@ public class ReStreamerClientImpl implements StreamingClient {
 
         return List.of(responseBody);
     }
+    //endregion
 
+    //region HELPER METHODS
     private String getStreamingProcessPayload(String studentId, Long participationId) {
         var processId = getStreamingProcessId(studentId, participationId);
         var fileName = getFileName(studentId, participationId);
@@ -325,18 +333,8 @@ public class ReStreamerClientImpl implements StreamingClient {
                 }
                 """;
         var valueMap = new HashMap<String, Object>();
-        valueMap.put("studentId", studentId);
-        valueMap.put("fileName", fileName);
-        valueMap.put("processId", processId);
-        valueMap.put("threadQueueSize", THREAD_QUEUE_SIZE);
-        valueMap.put("analyzeDuration", ANALYZE_DURATION);
-        valueMap.put("hlsTime", HLS_TIME);
-        valueMap.put("hlsListSize", HLS_LIST_SIZE);
-        valueMap.put("hlsDeleteThreshold", HLS_DELETE_THRESHOLD);
-        valueMap.put("masterPlPublishRate", MASTER_PL_PUBLISH_RATE);
-        valueMap.put("maxFileAgeSeconds", MAX_FILE_AGE_SECONDS);
-        valueMap.put("reconnectDelaySeconds", RECONNECT_DELAY_SECONDS);
-        valueMap.put("staleTimeOutSeconds", STALE_TIMEOUT_SECONDS);
+        populateBasicValueMap(valueMap, studentId, processId, fileName);
+        populateHlsValueMap(valueMap);
         var sub = new StringSubstitutor(valueMap);
         return sub.replace(payload);
     }
@@ -387,15 +385,27 @@ public class ReStreamerClientImpl implements StreamingClient {
                 }
                 """;
         var valueMap = new HashMap<String, Object>();
+        populateBasicValueMap(valueMap, studentId, processId, fileName);
+        var sub = new StringSubstitutor(valueMap);
+        return sub.replace(payload);
+    }
+
+    private void populateBasicValueMap(HashMap<String, Object> valueMap, String studentId, String processId, String fileName) {
         valueMap.put("studentId", studentId);
-        valueMap.put("fileName", fileName);
         valueMap.put("processId", processId);
+        valueMap.put("fileName", fileName);
         valueMap.put("threadQueueSize", THREAD_QUEUE_SIZE);
         valueMap.put("analyzeDuration", ANALYZE_DURATION);
         valueMap.put("reconnectDelaySeconds", RECONNECT_DELAY_SECONDS);
         valueMap.put("staleTimeOutSeconds", STALE_TIMEOUT_SECONDS);
-        var sub = new StringSubstitutor(valueMap);
-        return sub.replace(payload);
+    }
+
+    private void populateHlsValueMap(HashMap<String, Object> valueMap) {
+        valueMap.put("hlsTime", HLS_TIME);
+        valueMap.put("hlsListSize", HLS_LIST_SIZE);
+        valueMap.put("hlsDeleteThreshold", HLS_DELETE_THRESHOLD);
+        valueMap.put("masterPlPublishRate", MASTER_PL_PUBLISH_RATE);
+        valueMap.put("maxFileAgeSeconds", MAX_FILE_AGE_SECONDS);
     }
 
     private String getFileName(String studentId, Long participationId) {
@@ -421,4 +431,5 @@ public class ReStreamerClientImpl implements StreamingClient {
     private String getRecordingUrl(String studentId, Long recordingId) {
         return "%s/recordings/%s.mp4".formatted(STREAMING_SERVER_HTTP_URL_CLIENT, getFileName(studentId, recordingId));
     }
+    //endregion
 }
