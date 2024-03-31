@@ -10,13 +10,13 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class NewExamDto {
-    @NotBlank
+    @NotBlank(message = "Id is required")
     private String id;
-    @NotBlank
+    @NotBlank(message = "Name is required")
     private String name;
     private String creatorName;
-    @NotNull
+    @NotNull(message = "Start time is required")
     private LocalDateTime startTime;
-    @NotNull
+    @NotNull(message = "End time is required")
     private LocalDateTime endTime;
 }

@@ -70,6 +70,16 @@ public class StudentParticipationService {
             throw new ResourceNotFoundException("ExamSession with id %s in classroom %s not found".formatted(examId, classRoomId));
         }
         var examSession = tmpExamSession.get();
+        var exam = examSession.getExam();
+
+        if (LocalDateTime.now().isBefore(exam.getStartTime()) ){
+            log.info("Tried to REGISTER StudentParticipation for ExamSession [%s] that has not started yet".formatted(examSession.getId()));
+            throw new IllegalArgumentException("Exam has not started yet");
+        }
+        if (LocalDateTime.now().isAfter(exam.getEndTime())) {
+            log.info("Tried to REGISTER StudentParticipation for ExamSession [%s] that has already ended".formatted(examSession.getId()));
+            throw new IllegalArgumentException("Exam has already ended");
+        }
 
         var participation = participationRepository.findByExamSessionAndStudentId(examSession.id, participationDto.getStudentId()).orElseGet(() -> participationMapper.toDomain(participationDto));
 

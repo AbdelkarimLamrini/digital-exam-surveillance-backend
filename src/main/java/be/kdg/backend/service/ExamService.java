@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Slf4j
@@ -50,6 +51,14 @@ public class ExamService {
             throw new NotUniqueException("Exam with id %s already exists".formatted(examDto.getId()));
         }
         var exam = examMapper.toDomain(examDto);
+        if (exam.getStartTime().isAfter(exam.getEndTime())) {
+            log.info("Tried to CREATE Exam with start time [%s] after end time [%s]".formatted(exam.getStartTime(), exam.getEndTime()));
+            throw new IllegalArgumentException("Start time must be before end time");
+        }
+        if (exam.getStartTime().until(exam.getEndTime(), ChronoUnit.HOURS) > 6) {
+            log.info("Tried to CREATE Exam with duration longer than 6 hours");
+            throw new IllegalArgumentException("Exam duration must be less than 6 hours");
+        }
         exam = examRepository.save(exam);
         return examMapper.toDto(exam);
     }
