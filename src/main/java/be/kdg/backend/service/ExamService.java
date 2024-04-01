@@ -7,10 +7,12 @@ import be.kdg.backend.exception.NotUniqueException;
 import be.kdg.backend.exception.ResourceNotFoundException;
 import be.kdg.backend.mapper.ExamMapper;
 import be.kdg.backend.repository.ExamRepository;
+import be.kdg.backend.repository.ExamSessionRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -20,11 +22,13 @@ public class ExamService {
     private final ExamRepository examRepository;
     private final ExamMapper examMapper;
     private final ExamSessionService examSessionService;
+    private final ExamSessionRepository examSessionRepository;
 
-    public ExamService(ExamRepository examRepository, ExamMapper examMapper, ExamSessionService examSessionService) {
+    public ExamService(ExamRepository examRepository, ExamMapper examMapper, ExamSessionService examSessionService, ExamSessionRepository examSessionRepository) {
         this.examRepository = examRepository;
         this.examMapper = examMapper;
         this.examSessionService = examSessionService;
+        this.examSessionRepository = examSessionRepository;
     }
 
     @Transactional
@@ -79,11 +83,20 @@ public class ExamService {
 
     @Transactional
     public void deleteExam(String id) {
-        if (!examRepository.existsById(id)) {
+        var tmpExam = examRepository.findByIdWithSessions(id);
+        if (tmpExam.isEmpty()) {
             log.info("Tried to DELETE non-existing Exam [%s]".formatted(id));
             throw new ResourceNotFoundException("Exam with id %s not found".formatted(id));
         }
-        examRepository.deleteById(id);
+        var exam = tmpExam.get();
+        var sessions = exam.getExamSessions();
+
+        if (LocalDateTime.now().isAfter(exam.getStartTime()) && LocalDateTime.now().isBefore(exam.getEndTime())) {
+            endExam(id);
+        }
+
+        examRepository.delete(exam);
+        examSessionRepository.deleteAll(sessions);
     }
 
     @Transactional

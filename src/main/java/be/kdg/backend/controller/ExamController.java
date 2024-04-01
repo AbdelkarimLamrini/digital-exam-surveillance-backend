@@ -62,7 +62,7 @@ public class ExamController {
     }
 
     @PostMapping("/{id}/sessions")
-    public ResponseEntity<ExamSessionDto> createExamSession(@PathVariable String id, @RequestBody NewExamSessionDto examSessionDto) {
+    public ResponseEntity<ExamSessionDto> createExamSession(@PathVariable String id, @Valid @RequestBody NewExamSessionDto examSessionDto) {
         return ResponseEntity.ok(examSessionService.createExamSession(id, examSessionDto));
     }
 }

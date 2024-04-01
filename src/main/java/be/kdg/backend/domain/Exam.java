@@ -22,7 +22,7 @@ public class Exam {
     private String id;
     private String name;
     private String creatorName;
-    @OneToMany(mappedBy = "exam", orphanRemoval = true)
+    @OneToMany(mappedBy = "exam")
     private List<ExamSession> examSessions;
     @CreationTimestamp
     private LocalDateTime creationTime;

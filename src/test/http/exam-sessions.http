@@ -2,7 +2,7 @@
 GET {{backend-server}}/api/exams/DS2/sessions
 
 ### CREATE A SESSION
-POST {{backend-server}}/api/exams/DS2/session
+POST {{backend-server}}/api/exams/DS2/sessions
 Content-Type: application/json
 
 {
