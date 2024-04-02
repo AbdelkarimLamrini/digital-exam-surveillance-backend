@@ -35,7 +35,7 @@ public class ExamSessionService {
 
     @Transactional
     public List<ExamSessionDto> getExamSessions(String examId) {
-        var tmp = examRepository.findById(examId);
+        var tmp = examRepository.findByExamId(examId);
         if (tmp.isEmpty()) {
             log.info("Tried to GET ExamSessions for non-existing Exam [%s]".formatted(examId));
             throw new ResourceNotFoundException("Exam with id %s not found".formatted(examId));
@@ -57,7 +57,7 @@ public class ExamSessionService {
 
     @Transactional
     public ExamSessionDto createExamSession(String examId, NewExamSessionDto sessionDto) {
-        var tmpExam = examRepository.findById(examId);
+        var tmpExam = examRepository.findByExamId(examId);
         if (tmpExam.isEmpty()) {
             log.info("Tried to CREATE ExamSession with non-existing Exam [%s]".formatted(examId));
             throw new ResourceNotFoundException("Exam with id %s not found".formatted(examId));

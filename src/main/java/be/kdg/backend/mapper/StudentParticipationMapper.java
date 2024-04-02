@@ -19,8 +19,6 @@ public interface StudentParticipationMapper {
     @Mapping(target = "examId", source = "examSession.exam.id")
     StudentParticipationDto toDto(StudentParticipation participation);
 
-    @Mapping(target = "classRoomId", source = "examSession.classRoomId")
-    @Mapping(target = "examId", source = "examSession.exam.id")
     List<StudentParticipationDto> toDto(List<StudentParticipation> participations);
 
     List<StudentParticipationAIDto> toAiDto(List<StudentParticipation> participations);

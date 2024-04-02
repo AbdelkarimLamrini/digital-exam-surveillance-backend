@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"exam_id", "class_room_id"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"exam_pk", "class_room_id"}))
 public class ExamSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

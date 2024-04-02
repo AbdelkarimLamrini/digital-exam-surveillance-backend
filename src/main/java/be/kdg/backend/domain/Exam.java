@@ -1,8 +1,6 @@
 package be.kdg.backend.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Getter
@@ -17,8 +16,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(indexes = {@Index(name = "exam_id_index", columnList = "id")}, uniqueConstraints = @UniqueConstraint(columnNames = {"id"}))
 public class Exam {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long pk;
     private String id;
     private String name;
     private String creatorName;
@@ -28,4 +30,8 @@ public class Exam {
     private LocalDateTime creationTime;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+
+    public long getDurationHours() {
+        return startTime.until(endTime, ChronoUnit.HOURS);
+    }
 }

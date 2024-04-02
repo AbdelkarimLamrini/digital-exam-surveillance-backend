@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Slf4j
@@ -33,7 +32,7 @@ public class ExamService {
 
     @Transactional
     public ExamDetailDto getExam(String id) {
-        var tmp = examRepository.findByIdWithSessions(id);
+        var tmp = examRepository.findByExamIdWithSessions(id);
         if (tmp.isEmpty()) {
             log.info("Tried to GET non-existing Exam [%s]".formatted(id));
             throw new ResourceNotFoundException("Exam with id %s not found".formatted(id));
@@ -50,16 +49,16 @@ public class ExamService {
 
     @Transactional
     public ExamDto createExam(NewExamDto examDto) {
-        if (examRepository.existsById(examDto.getId())) {
+        if (examRepository.existsByExamId(examDto.getId())) {
             log.info("Tried to CREATE Exam with id [%s] that already exists".formatted(examDto.getId()));
             throw new NotUniqueException("Exam with id %s already exists".formatted(examDto.getId()));
         }
         var exam = examMapper.toDomain(examDto);
-        if (exam.getStartTime().isAfter(exam.getEndTime())) {
+        if (exam.getDurationHours() < 0) {
             log.info("Tried to CREATE Exam with start time [%s] after end time [%s]".formatted(exam.getStartTime(), exam.getEndTime()));
             throw new IllegalArgumentException("Start time must be before end time");
         }
-        if (exam.getStartTime().until(exam.getEndTime(), ChronoUnit.HOURS) > 6) {
+        if (exam.getDurationHours() > 6) {
             log.info("Tried to CREATE Exam with duration longer than 6 hours");
             throw new IllegalArgumentException("Exam duration must be less than 6 hours");
         }
@@ -69,21 +68,34 @@ public class ExamService {
 
     @Transactional
     public ExamDto updateExam(String id, NewExamDto examDto) {
-        var tmp = examRepository.findById(id);
+        var tmp = examRepository.findByExamId(id);
         if (tmp.isEmpty()) {
             log.info("Tried to UPDATE non-existing Exam [%s]".formatted(id));
             throw new ResourceNotFoundException("Exam with id %s not found".formatted(id));
         }
-        var creationTime = tmp.get().getCreationTime();
+        if (!examDto.getId().equals(id) && examRepository.existsByExamId(examDto.getId())) {
+            log.info("Tried to UPDATE Exam with id [%s] to an id that already exists".formatted(id));
+            throw new NotUniqueException("Exam with id %s already exists".formatted(examDto.getId()));
+        }
+        var prevExam = tmp.get();
         var exam = examMapper.toDomain(examDto);
-        exam.setCreationTime(creationTime);
+        if (exam.getDurationHours() < 0) {
+            log.info("Tried to UPDATE Exam with start time [%s] after end time [%s]".formatted(exam.getStartTime(), exam.getEndTime()));
+            throw new IllegalArgumentException("Start time must be before end time");
+        }
+        if (exam.getDurationHours() > 6) {
+            log.info("Tried to UPDATE Exam with duration longer than 6 hours");
+            throw new IllegalArgumentException("Exam duration must be less than 6 hours");
+        }
+        exam.setCreationTime(prevExam.getCreationTime());
+        exam.setPk(prevExam.getPk());
         exam = examRepository.save(exam);
         return examMapper.toDto(exam);
     }
 
     @Transactional
     public void deleteExam(String id) {
-        var tmpExam = examRepository.findByIdWithSessions(id);
+        var tmpExam = examRepository.findByExamIdWithSessions(id);
         if (tmpExam.isEmpty()) {
             log.info("Tried to DELETE non-existing Exam [%s]".formatted(id));
             throw new ResourceNotFoundException("Exam with id %s not found".formatted(id));
@@ -101,7 +113,7 @@ public class ExamService {
 
     @Transactional
     public void endExam(String id) {
-        var tmp = examRepository.findByIdWithSessions(id);
+        var tmp = examRepository.findByExamIdWithSessions(id);
         if (tmp.isEmpty()) {
             log.info("Tried to END non-existing Exam [%s]".formatted(id));
             throw new ResourceNotFoundException("Exam with id %s not found".formatted(id));
