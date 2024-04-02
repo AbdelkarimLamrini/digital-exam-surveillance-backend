@@ -10,13 +10,13 @@ import lombok.Setter;
 @Getter
 @Setter
 public class NewFraudDetectionDto {
-    @Min(1)
-    @NotNull
+    @Min(value = 1, message = "ParticipationId must be greater than 0")
+    @NotNull(message = "ParticipationId is required")
     private Long participationId;
-    @NotBlank
+    @NotBlank(message = "StudentId is required")
     private String studentId;
-    @Min(0)
-    @Max(1)
+    @Min(value = 0, message = "FraudScore must be between 0 and 1")
+    @Max(value = 1, message = "FraudScore must be between 0 and 1")
     @NotNull
     private Double fraudScore;
 }

@@ -7,8 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class NewExamSessionDto {
-    @NotBlank
+    @NotBlank(message = "Classroom is required")
     public String classRoomId;
-    @NotBlank
+    @NotBlank(message = "Supervisor name is required")
     public String supervisorName;
 }
