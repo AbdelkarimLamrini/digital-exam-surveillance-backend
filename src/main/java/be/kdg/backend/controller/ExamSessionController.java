@@ -5,6 +5,7 @@ import be.kdg.backend.dto.examsession.ExamSessionDto;
 import be.kdg.backend.dto.examsession.NewExamSessionDto;
 import be.kdg.backend.dto.student.StudentParticipationDto;
 import be.kdg.backend.service.ExamSessionService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +37,7 @@ public class ExamSessionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ExamSessionDto> updateExamSession(@PathVariable Long id, @RequestBody NewExamSessionDto examSessionDto) {
+    public ResponseEntity<ExamSessionDto> updateExamSession(@PathVariable Long id, @Valid @RequestBody NewExamSessionDto examSessionDto) {
         return ResponseEntity.ok(examSessionService.updateExamSession(id, examSessionDto));
     }
 
