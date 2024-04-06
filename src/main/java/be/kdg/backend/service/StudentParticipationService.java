@@ -4,6 +4,7 @@ import be.kdg.backend.client.StreamingClient;
 import be.kdg.backend.controller.SupervisorWsController;
 import be.kdg.backend.domain.ConnectionStatus;
 import be.kdg.backend.domain.StreamLog;
+import be.kdg.backend.domain.StudentParticipation;
 import be.kdg.backend.dto.recording.RecordingDto;
 import be.kdg.backend.dto.streamlog.StreamLogDto;
 import be.kdg.backend.dto.student.NewStudentParticipationDto;
@@ -72,7 +73,7 @@ public class StudentParticipationService {
         var examSession = tmpExamSession.get();
         var exam = examSession.getExam();
 
-        if (LocalDateTime.now().isBefore(exam.getStartTime()) ){
+        if (LocalDateTime.now().isBefore(exam.getStartTime())) {
             log.info("Tried to REGISTER StudentParticipation for ExamSession [%s] that has not started yet".formatted(examSession.getId()));
             throw new IllegalArgumentException("Exam has not started yet");
         }
@@ -81,7 +82,16 @@ public class StudentParticipationService {
             throw new IllegalArgumentException("Exam has already ended");
         }
 
-        var participation = participationRepository.findByExamSessionAndStudentId(examSession.id, participationDto.getStudentId()).orElseGet(() -> participationMapper.toDomain(participationDto));
+        var tmpParticipation = participationRepository.findByExamSessionAndStudentId(examSession.id, participationDto.getStudentId());
+        StudentParticipation participation;
+        if (tmpParticipation.isPresent()) {
+            participation = tmpParticipation.get();
+            participation.setFullName(participationDto.getFullName());
+            participation.setEmail(participationDto.getEmail());
+            participation.setEndTime(null);
+        } else {
+            participation = participationMapper.toDomain(participationDto);
+        }
 
         participation.setExamSession(examSession);
         participation.setStatus(ConnectionStatus.CONNECTING);

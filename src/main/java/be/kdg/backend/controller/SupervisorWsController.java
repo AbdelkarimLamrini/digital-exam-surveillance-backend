@@ -28,7 +28,7 @@ public class SupervisorWsController {
      */
     public void sendLogMessage(Long sessionId, List<StreamLogMessage> message) {
         log.info("[WS] Sending log message to supervisors of ExamSession [%s]".formatted(sessionId));
-        messagingTemplate.convertAndSend("/topic/exam-session/%s/log".formatted(sessionId), message);
+        messagingTemplate.convertAndSend("/topic/exam-sessions/%s/logs".formatted(sessionId), message);
     }
 
     /**
@@ -41,7 +41,7 @@ public class SupervisorWsController {
      */
     public void sendParticipationMessage(Long sessionId, StudentParticipationDto message) {
         log.info("[WS] Sending participation message to supervisors of ExamSession [%s]".formatted(sessionId));
-        messagingTemplate.convertAndSend("/topic/exam-session/%s/participation".formatted(sessionId), message);
+        messagingTemplate.convertAndSend("/topic/exam-sessions/%s/participations".formatted(sessionId), message);
     }
 
     /**
@@ -54,6 +54,6 @@ public class SupervisorWsController {
      */
     public void sendFraudDetection(Long sessionId, FraudDetectionDto message) {
         log.info("[WS] Sending fraud detection message to supervisors of ExamSession [%s]".formatted(sessionId));
-        messagingTemplate.convertAndSend("/topic/exam-session/%s/fraud".formatted(sessionId), message);
+        messagingTemplate.convertAndSend("/topic/exam-sessions/%s/fraud-detections".formatted(sessionId), message);
     }
 }
